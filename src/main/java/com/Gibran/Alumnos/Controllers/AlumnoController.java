@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,7 +49,11 @@ public class AlumnoController {
             return ResponseEntity.ok(actualizado);
         }).orElse(ResponseEntity.notFound().build());
     }
-
+//Metodo para eliminar un alumno de la base de datos
+    @DeleteMapping("/eliminar-alumnos/{id}")
+    public void eliminarAlumno(@PathVariable Long id) {
+        alumnoRepository.deleteById(id);
+    }
 
 }
 
