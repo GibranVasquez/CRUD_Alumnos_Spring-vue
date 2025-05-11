@@ -30,6 +30,12 @@ const agregarAlumno = async () => {
   };
 }
 
+const eliminarAlumno = async (id) => {
+  await axios.delete(`http://localhost:8080/alumnos/eliminar-alumnos/${id}`);
+  console.log(`Alumno con ID ${id} eliminado`);
+  await cargarAlumnos();
+}
+
 
 onMounted(cargarAlumnos);
    
@@ -97,7 +103,7 @@ onMounted(cargarAlumnos);
       <td>{{ alumno.telefono }}</td>
       <td><img :src="alumno.imagenURL" alt="Imagen de {{ alumno.nombre }}" width="50"></td>
       <td>
-        <button class="btn btn-danger ms-2 mx-2">
+        <button @click=eliminarAlumno(alumno.id) class="btn btn-danger ms-2 mx-2">
         <i class="bi bi-trash"></i>  <!-- Icono de basura -->
     </button>
     <button class="btn btn-warning">
