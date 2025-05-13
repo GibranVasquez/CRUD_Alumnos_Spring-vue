@@ -6,6 +6,7 @@ import Swal from 'sweetalert2';
 const motos = ref([]);
 const editando = ref(false);
 const isLoading = ref(true);
+const activeSection = ref('listado'); // Controla la sección activa
 
 const nuevaMoto = ref({
   id: null,
@@ -58,6 +59,7 @@ const guardarMoto = async () => {
     
     await cargarMotos();
     resetForm();
+    activeSection.value = 'listado'; // Volver al listado después de guardar
   } catch (error) {
     console.error('Error al guardar moto:', error);
     Swal.fire({
@@ -71,8 +73,7 @@ const guardarMoto = async () => {
 const editarMoto = (moto) => {
   nuevaMoto.value = { ...moto };
   editando.value = true;
-  // Scroll to form
-  document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' });
+  activeSection.value = 'agregar';
 };
 
 const eliminarMoto = async (id) => {
@@ -122,6 +123,13 @@ const resetForm = () => {
   editando.value = false;
 };
 
+const cambiarSeccion = (seccion) => {
+  activeSection.value = seccion;
+  if (seccion === 'agregar') {
+    resetForm();
+  }
+};
+
 onMounted(() => {
   // Add small delay to show loading animation
   setTimeout(cargarMotos, 500);
@@ -129,13 +137,54 @@ onMounted(() => {
 </script>
 
 <template>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    <div class="container">
+      <a class="navbar-brand fw-bold" href="#">MotoShop</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" :class="{ 'active': activeSection === 'home' }" 
+               @click="cambiarSeccion('home')" href="#">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" :class="{ 'active': activeSection === 'listado' }" 
+               @click="cambiarSeccion('listado')" href="#">Listado de Motos</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" :class="{ 'active': activeSection === 'agregar' }" 
+               @click="cambiarSeccion('agregar')" href="#">Agregar</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
   <div class="container py-4">
-    <!-- Form Section -->
-    <div id="form-section" class="row animate__animated animate__fadeIn">
+    <!-- Home Section -->
+    <div v-if="activeSection === 'home'" class="row animate__animated animate__fadeIn">
+      <div class="col-12">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body text-center py-5">
+            <h1 class="display-4 fw-light mb-4">Bienvenido a MotoShop</h1>
+            <p class="lead text-muted mb-4">Gestión integral de tu inventario de motocicletas</p>
+            <button class="btn btn-primary btn-lg px-4" @click="cambiarSeccion('listado')">
+              Ver listado de motos
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Section (Agregar/Editar) -->
+    <div v-if="activeSection === 'agregar'" id="form-section" class="row animate__animated animate__fadeIn">
       <div class="col-lg-8 mx-auto">
         <div class="card border-0 shadow-sm mb-5">
           <div class="card-body p-4">
-            <h2 class="text-center mb-4 fw-light">Gestión de Motos</h2>
+            <h2 class="text-center mb-4 fw-light">{{ editando ? 'Editar Moto' : 'Agregar Nueva Moto' }}</h2>
             <form @submit.prevent="guardarMoto" class="needs-validation" novalidate>
               <div class="row g-3">
                 <div class="col-md-6">
@@ -181,7 +230,7 @@ onMounted(() => {
               </div>
               <div class="d-flex justify-content-end mt-4">
                 <button type="button" class="btn btn-outline-secondary me-2" 
-                        @click="resetForm" v-if="editando">
+                        @click="cambiarSeccion('listado')">
                   Cancelar
                 </button>
                 <button type="submit" class="btn btn-primary px-4">
@@ -195,12 +244,15 @@ onMounted(() => {
     </div>
 
     <!-- List Section -->
-    <div class="row animate__animated animate__fadeIn animate__delay-1s">
+    <div v-if="activeSection === 'listado'" class="row animate__animated animate__fadeIn">
       <div class="col-12">
         <div class="card border-0 shadow-sm">
           <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center mb-4">
               <h3 class="card-title mb-0 fw-light">Listado de Motos</h3>
+              <button class="btn btn-primary" @click="cambiarSeccion('agregar')">
+                <i class="bi bi-plus"></i> Agregar Moto
+              </button>
             </div>
             
             <div v-if="isLoading" class="text-center py-5">
@@ -270,6 +322,30 @@ onMounted(() => {
 <style scoped>
 @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 @import url('https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css');
+
+.navbar {
+  padding: 0.75rem 1rem;
+}
+
+.navbar-brand {
+  font-size: 1.5rem;
+}
+
+.nav-link {
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+}
+
+.nav-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.nav-link.active {
+  background-color: rgba(255, 255, 255, 0.2);
+  font-weight: 500;
+}
 
 .card {
   background-color: #f8f9fa;
